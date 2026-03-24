@@ -785,19 +785,14 @@ form.addEventListener("submit", async (event) => {
       fileBase64: await fileToBase64(file)
     };
 
-    const response = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || !result.success) {
-      throw new Error(result.message || "ส่งข้อมูลไม่สำเร็จ");
-    }
+await fetch(APPS_SCRIPT_URL, {
+  method: "POST",
+  mode: "no-cors",
+  headers: {
+    "Content-Type": "text/plain;charset=utf-8"
+  },
+  body: JSON.stringify(payload)
+});
 
     showStatus("ได้รับข้อมูลเรียบร้อยแล้ว", "success");
     alert("ได้รับข้อมูลเรียบร้อยแล้ว");

@@ -1,3 +1,143 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynex Warranty Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; }
+    .field { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 4px; }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+    .status.show { display: block; }
+    .status.success { background: #d4edda; }
+    .status.error { background: #f8d7da; }
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <h2>ลงทะเบียนรับประกัน Dynex</h2>
+
+  <form id="dynexForm">
+
+    <div class="field">
+      <label>อีเมล</label>
+      <input name="email" type="email" required>
+    </div>
+
+    <div class="field">
+      <label>ชื่อร้าน</label>
+      <input name="shopName" required>
+    </div>
+
+    <div class="field">
+      <label>จังหวัด</label>
+      <input name="province" required>
+    </div>
+
+    <div class="field">
+      <label>ชื่อเจ้าของ</label>
+      <input name="ownerName" required>
+    </div>
+
+    <div class="field">
+      <label>เบอร์โทร</label>
+      <input name="ownerPhone" required>
+    </div>
+
+    <div class="field">
+      <label>ยี่ห้อรถ</label>
+      <input name="brand" required>
+    </div>
+
+    <div class="field">
+      <label>รุ่นรถ</label>
+      <input name="model" required>
+    </div>
+
+    <div class="field">
+      <label>ปีรถ</label>
+      <input name="year" required>
+    </div>
+
+    <div class="field">
+      <label>แรงม้า</label>
+      <input name="horsepower">
+    </div>
+
+    <div class="field">
+      <label>รุ่นแบตเตอรี่</label>
+      <input name="batteryModel" required>
+    </div>
+
+    <div class="field">
+      <label>Serial Number</label>
+      <input name="serialNumber" required>
+    </div>
+
+    <div class="field">
+      <label>รุ่นรถที่ติดตั้ง</label>
+      <input name="installedCarModel">
+    </div>
+
+    <div class="field">
+      <label>เลขไมล์</label>
+      <input name="mileage">
+    </div>
+
+    <div class="field">
+      <label>วันที่ติดตั้ง</label>
+      <input name="installDate" type="date">
+    </div>
+
+    <div class="field">
+      <label>แนบใบเสร็จ</label>
+      <input id="receipt" type="file" required>
+      <div id="fileMeta">รองรับ JPG, PNG, PDF</div>
+    </div>
+
+    <button id="submitBtn">ส่งข้อมูล</button>
+    <div id="statusBox" class="status"></div>
+
+  </form>
+</div>
+
 <script>
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKfrgUe0feI07W77_gDGd1NCfUZFbpx2Vu4zeu_XttfKnK5zKxn2AjYuXgXOQ_PvoTSw/exec";
 
@@ -7,207 +147,81 @@ const submitBtn = document.getElementById("submitBtn");
 const fileInput = document.getElementById("receipt");
 const fileMeta = document.getElementById("fileMeta");
 
-const onlyDigits = (value) => (value || "").replace(/\D+/g, "");
-
-function showStatus(message, type) {
+function showStatus(msg, type){
   statusBox.className = "status show " + type;
-  statusBox.textContent = message;
+  statusBox.textContent = msg;
 }
 
-function sanitizeNumericFields() {
-  const phone = form.elements.ownerPhone;
-  const year = form.elements.year;
-  const serial = form.elements.serialNumber;
-  const mileage = form.elements.mileage;
-
-  phone.value = onlyDigits(phone.value).slice(0, 15);
-  year.value = onlyDigits(year.value).slice(0, 4);
-  serial.value = onlyDigits(serial.value).slice(0, 18);
-  mileage.value = onlyDigits(mileage.value).slice(0, 12);
-}
-
-["ownerPhone", "year", "serialNumber", "mileage"].forEach((name) => {
-  form.elements[name].addEventListener("input", sanitizeNumericFields);
+fileInput.addEventListener("change", ()=>{
+  const f = fileInput.files[0];
+  if(!f){ fileMeta.textContent="รองรับ JPG, PNG, PDF"; return;}
+  fileMeta.textContent = f.name;
 });
 
-fileInput.addEventListener("change", () => {
-  const file = fileInput.files && fileInput.files[0];
-  if (!file) {
-    fileMeta.textContent = "รองรับไฟล์ JPG, PNG, WEBP และ PDF";
-    return;
-  }
-  const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-  fileMeta.textContent = `เลือกไฟล์แล้ว: ${file.name} (${sizeMB} MB)`;
-});
-
-function applyQueryStringPrefill() {
-  const params = new URLSearchParams(window.location.search);
-  const mapping = {
-    "entry.912384794": "email",
-    "entry.2092238618": "shopName",
-    "entry.1176655828": "province",
-    "entry.545221185": "ownerName",
-    "entry.106097018": "ownerPhone",
-    "entry.304710007": "brand",
-    "entry.1140837996": "model",
-    "entry.236465467": "year",
-    "entry.326773066": "horsepower",
-    "entry.1929733376": "batteryModel",
-    "entry.1793562486": "serialNumber",
-    "entry.2109138769": "installedCarModel",
-    "entry.1556369182": "mileage",
-    "entry.1313741841": "installDate",
-    "email": "email",
-    "shopName": "shopName",
-    "province": "province",
-    "ownerName": "ownerName",
-    "ownerPhone": "ownerPhone",
-    "brand": "brand",
-    "model": "model",
-    "year": "year",
-    "horsepower": "horsepower",
-    "batteryModel": "batteryModel",
-    "serialNumber": "serialNumber",
-    "installedCarModel": "installedCarModel",
-    "mileage": "mileage",
-    "installDate": "installDate"
-  };
-
-  params.forEach((value, key) => {
-    const targetName = mapping[key];
-    if (targetName && form.elements[targetName]) {
-      form.elements[targetName].value = value;
-      form.elements[targetName].dispatchEvent(new Event("change", { bubbles: true }));
-    }
-  });
-
-  sanitizeNumericFields();
-
-  const autoSubmit = params.get("autosubmit");
-  if (autoSubmit === "1") {
-    showStatus("ระบบพบ autosubmit=1 แต่ยังไม่ส่งอัตโนมัติ เพราะต้องแนบไฟล์ใบเสร็จก่อน", "error");
-  }
-}
-
-async function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result || "");
-      const base64 = result.includes(",") ? result.split(",")[1] : result;
-      resolve(base64);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload=()=>res(r.result.split(",")[1]);
+    r.onerror=rej;
+    r.readAsDataURL(file);
   });
 }
 
-function validateForm() {
-  sanitizeNumericFields();
-
-  if (!form.reportValidity()) return false;
-
-  if (!/^[0-9]{9,15}$/.test(form.elements.ownerPhone.value)) {
-    showStatus("เบอร์ติดต่อกรอกได้เฉพาะตัวเลข 9-15 หลัก", "error");
-    form.elements.ownerPhone.focus();
-    return false;
-  }
-
-  if (!/^[0-9]{4}$/.test(form.elements.year.value)) {
-    showStatus("ปีรถต้องเป็นตัวเลข 4 หลัก", "error");
-    form.elements.year.focus();
-    return false;
-  }
-
-  if (!/^[0-9]{1,18}$/.test(form.elements.serialNumber.value)) {
-    showStatus("Serial Numbers ต้องเป็นตัวเลขเท่านั้นและไม่เกิน 18 หลัก", "error");
-    form.elements.serialNumber.focus();
-    return false;
-  }
-
-  if (!/^[0-9]{1,12}$/.test(form.elements.mileage.value)) {
-    showStatus("เลขไมล์ต้องเป็นตัวเลขเท่านั้น", "error");
-    form.elements.mileage.focus();
-    return false;
-  }
-
-  const file = fileInput.files && fileInput.files[0];
-  if (!file) {
-    showStatus("กรุณาแนบใบเสร็จก่อนส่งข้อมูล", "error");
-    return false;
-  }
-
-  return true;
-}
-
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  if (!validateForm()) return;
-
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE")) {
-    showStatus("ยังไม่ได้ตั้งค่า APPS_SCRIPT_URL ในไฟล์ index.html", "error");
-    return;
-  }
+form.addEventListener("submit", async (e)=>{
+  e.preventDefault();
 
   const file = fileInput.files[0];
-  const submitText = submitBtn.textContent;
-  submitBtn.disabled = true;
-  submitBtn.textContent = "กำลังอัปโหลด...";
+  if(!file){
+    showStatus("กรุณาแนบใบเสร็จ","error");
+    return;
+  }
 
-  try {
-    showStatus("กำลังอัปโหลดใบเสร็จและบันทึกข้อมูล กรุณารอสักครู่...", "success");
+  submitBtn.disabled=true;
+  submitBtn.textContent="กำลังส่ง...";
 
-    const payload = {
-      email: form.elements.email.value.trim(),
-      shopName: form.elements.shopName.value.trim(),
-      province: form.elements.province.value.trim(),
-      ownerName: form.elements.ownerName.value.trim(),
-      ownerPhone: form.elements.ownerPhone.value.trim(),
-      brand: form.elements.brand.value.trim(),
-      model: form.elements.model.value.trim(),
-      year: form.elements.year.value.trim(),
-      horsepower: form.elements.horsepower.value,
-      batteryModel: form.elements.batteryModel.value,
-      serialNumber: form.elements.serialNumber.value.trim(),
-      installedCarModel: form.elements.installedCarModel.value.trim(),
-      mileage: form.elements.mileage.value.trim(),
-      installDate: form.elements.installDate.value,
+  try{
+    const payload={
+      email: form.email.value,
+      shopName: form.shopName.value,
+      province: form.province.value,
+      ownerName: form.ownerName.value,
+      ownerPhone: form.ownerPhone.value,
+      brand: form.brand.value,
+      model: form.model.value,
+      year: form.year.value,
+      horsepower: form.horsepower.value,
+      batteryModel: form.batteryModel.value,
+      serialNumber: form.serialNumber.value,
+      installedCarModel: form.installedCarModel.value,
+      mileage: form.mileage.value,
+      installDate: form.installDate.value,
       fileName: file.name,
-      mimeType: file.type || "application/octet-stream",
+      mimeType: file.type,
       fileBase64: await fileToBase64(file)
     };
 
-    const response = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
+    const res = await fetch(APPS_SCRIPT_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"text/plain;charset=utf-8"},
       body: JSON.stringify(payload)
     });
 
-    const result = await response.json();
+    const result = await res.json();
 
-    if (!response.ok || !result.success) {
-      throw new Error(result.message || "ส่งข้อมูลไม่สำเร็จ");
-    }
+    if(!result.success) throw new Error(result.message);
 
-    showStatus("ได้รับข้อมูลเรียบร้อยแล้ว", "success");
-    alert("ได้รับข้อมูลเรียบร้อยแล้ว");
+    showStatus("ส่งสำเร็จแล้ว 🎉","success");
     form.reset();
-    fileMeta.textContent = "รองรับไฟล์ JPG, PNG, WEBP และ PDF";
+    fileMeta.textContent="รองรับ JPG, PNG, PDF";
 
-    document.querySelectorAll("select.control").forEach((select) => {
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-  } catch (error) {
-    console.error(error);
-    showStatus("ส่งข้อมูลไม่สำเร็จ: " + (error.message || "กรุณาตรวจสอบ Apps Script และสิทธิ์การเข้าถึง"), "error");
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = submitText;
+  }catch(err){
+    showStatus("Error: "+err.message,"error");
   }
-});
 
-applyQueryStringPrefill();
+  submitBtn.disabled=false;
+  submitBtn.textContent="ส่งข้อมูล";
+});
 </script>
+
+</body>
+</html>
